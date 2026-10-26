@@ -15,6 +15,11 @@ npm run dev            # http://localhost:5173
 
 Requiere el backend en marcha. Si `VITE_API_URL` apunta a otro origen, configure `CORS_ORIGIN` en el backend.
 
+## Despliegue en Vercel
+
+- `vercel.json` redirige todas las rutas a `index.html`, para que recargar en `/inventario`, `/usuarios`, etc. no dé 404 (las rutas las resuelve React Router en el navegador). Los archivos de `dist/` se sirven antes que esta regla.
+- Defina `VITE_API_URL` en las variables de entorno del proyecto en Vercel con la URL pública del backend (por ejemplo `https://mi-api.example.com/api`) y agregue el dominio de Vercel a `CORS_ORIGIN` en el backend. Las variables `VITE_*` se leen al compilar: tras cambiarlas, vuelva a desplegar.
+
 ## Pruebas
 
 ```bash
