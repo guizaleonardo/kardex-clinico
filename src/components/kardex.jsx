@@ -120,7 +120,12 @@ export function ItemForm({ item, items, onClose, onSaved }) {
     try {
       const body = Object.fromEntries(fields.map(([k]) => [k, o[k]]));
       if (item) { await api.put(`/items/${item.id}`, body); toast("Ítem actualizado"); }
-      else { const n = await api.post("/items", body); toast("Ítem creado con saldo inicial " + fmtN(n.saldo)); }
+      else {
+        const n = await api.post("/items", { ...body, soporte: o.soporte });
+        toast(n.sumado
+          ? `Ese producto ya existía: se sumaron ${fmtN(n.cantidadSumada)} und. a su saldo (nuevo saldo ${fmtN(n.saldo)}).`
+          : "Ítem creado con saldo inicial " + fmtN(n.saldo), 5000);
+      }
       onSaved?.();
       onClose();
     } catch (e) { toast(e.message); setSaving(false); }
@@ -140,6 +145,10 @@ export function ItemForm({ item, items, onClose, onSaved }) {
           : <label key={k} className={`f ${k === "nombre" ? "wide" : ""}`} htmlFor={`f-${k}`}>{l}{["nombre", "lote", "vencimiento", "invima"].includes(k) ? " *" : ""}
               <FieldInput k={k} value={o[k]} ubics={ubics} onChange={(v) => setO({ ...o, [k]: v })} /></label>)}
       </div>
+      {!item && <>
+        <label className="f">Documento soporte (factura / remisión)<input value={o.soporte || ""} placeholder="Opcional" onChange={(e) => setO({ ...o, soporte: e.target.value })} /></label>
+        <p className="small muted">Si el producto ya existe con el mismo código o nombre, lote, serie y ubicación, la cantidad se suma a su saldo como una entrada en el kardex.</p>
+      </>}
       <p className="small muted">* Campos que exige el estándar de habilitación para trazabilidad.</p>
       <div className="row between">
         {item && can("inventario:inactivar") ? <button className="btn danger" onClick={inactivar}>Inactivar ítem</button> : <span />}

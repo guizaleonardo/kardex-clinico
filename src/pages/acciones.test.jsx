@@ -54,6 +54,20 @@ describe("inventario: acciones según permisos", () => {
   });
 });
 
+describe("nuevo ítem que ya existe", () => {
+  it("avisa que la cantidad se sumó al existente y envía el soporte", async () => {
+    renderApp({ permisos: ["inventario:ver", "inventario:crear"], path: "/inventario", rutas: { "/items": [ITEM] } });
+    api.post.mockResolvedValue({ ...ITEM, saldo: 15, sumado: true, cantidadSumada: 5 });
+    await userEvent.click(await screen.findByRole("button", { name: "Nuevo ítem" }));
+    await userEvent.type(screen.getByLabelText(/Nombre \/ DCI/), "Dipirona");
+    await userEvent.type(screen.getByLabelText("Cantidad"), "5");
+    await userEvent.type(screen.getByLabelText(/Documento soporte/), "FAC-9");
+    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    expect(api.post).toHaveBeenCalledWith("/items", expect.objectContaining({ nombre: "Dipirona", cantidad: 5, soporte: "FAC-9" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("se sumaron 5 und. a su saldo (nuevo saldo 15)");
+  });
+});
+
 describe("toma física: acciones según permisos", () => {
   const CONTEO = { id: "c1", fecha: "2026-10-01", ubicacion: "UCI", estado: "abierto", ciega: true, por: { nombre: "Ana" }, resumen: { contadas: 0, lineas: 1 }, lineas: [{ id: "l1", nombre: "Dipirona", lote: "A1", serie: "", venc: "", fisico: null, obs: "" }] };
 

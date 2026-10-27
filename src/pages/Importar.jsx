@@ -37,7 +37,7 @@ export default function Importar() {
         archivo: imp.file, destino: imp.destino, soporte: imp.soporte,
         filas: validas.map(({ _fila, _avisos, _valida, ...o }) => o),
       });
-      toast(`Carga lista: ${r.creados} ítems creados, ${r.entradas} entradas, ${r.omitidos} omitidos.`, 6000);
+      toast(`Carga lista: ${r.creados} ítems creados, ${r.sumados || 0} sumados a existentes, ${r.entradas} entradas, ${r.omitidos} omitidos.`, 6000);
       setImp(null);
       reload();
     } catch (e) { toast(e.message); }
@@ -60,7 +60,7 @@ export default function Importar() {
         <div className="panel">
           <div className="row between"><h3>{imp.file}</h3><button className="btn sm" onClick={() => setImp(null)}>Descartar</button></div>
           <div className="form" style={{ marginTop: 8 }}>
-            <label className="f">Destino<select value={imp.destino} onChange={set("destino")}><option value="maestro">Crear ítems en el maestro (saldo inicial)</option><option value="entrada">Registrar entradas (remisión / factura)</option></select></label>
+            <label className="f">Destino<select value={imp.destino} onChange={set("destino")}><option value="maestro">Cargar al maestro (los existentes suman su cantidad)</option><option value="entrada">Registrar entradas (remisión / factura)</option></select></label>
             {imp.destino === "entrada" && <label className="f">Documento soporte *<input value={imp.soporte} onChange={set("soporte")} placeholder="Remisión o factura" /></label>}
             <label className="f">Tipo por defecto<select value={imp.defTipo} onChange={set("defTipo")}>{Object.entries(TIPOS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></label>
             <label className="f">Ubicación por defecto<select value={imp.defUbic} onChange={set("defUbic")}>{cfg.servicios.map((s) => <option key={s}>{s}</option>)}</select></label>
@@ -93,8 +93,8 @@ export default function Importar() {
         <h3>Historial de cargas</h3>
         {hist?.length ? (
           <div className="tbl-wrap"><table>
-            <thead><tr><th>Fecha</th><th>Archivo</th><th>Destino</th><th className="num">Filas</th><th className="num">Creados</th><th className="num">Entradas</th><th className="num">Omitidos</th><th>Usuario</th></tr></thead>
-            <tbody>{hist.map((h) => <tr key={h.id}><td className="small">{fmtTs(h.ts)}</td><td className="small">{h.archivo}</td><td>{h.destino}</td><td className="num">{fmtN(h.filas)}</td><td className="num">{fmtN(h.creados)}</td><td className="num">{fmtN(h.entradas)}</td><td className="num" title={h.errores?.join("\n")}>{fmtN(h.omitidos)}</td><td className="small">{h.por?.nombre}</td></tr>)}</tbody>
+            <thead><tr><th>Fecha</th><th>Archivo</th><th>Destino</th><th className="num">Filas</th><th className="num">Creados</th><th className="num">Sumados</th><th className="num">Entradas</th><th className="num">Omitidos</th><th>Usuario</th></tr></thead>
+            <tbody>{hist.map((h) => <tr key={h.id}><td className="small">{fmtTs(h.ts)}</td><td className="small">{h.archivo}</td><td>{h.destino}</td><td className="num">{fmtN(h.filas)}</td><td className="num">{fmtN(h.creados)}</td><td className="num">{fmtN(h.sumados)}</td><td className="num">{fmtN(h.entradas)}</td><td className="num" title={h.errores?.join("\n")}>{fmtN(h.omitidos)}</td><td className="small">{h.por?.nombre}</td></tr>)}</tbody>
           </table></div>
         ) : <p className="small muted">Sin cargas registradas.</p>}
       </div>
